@@ -1,4 +1,5 @@
 const Shop = require("../models/shop.model");
+const Promotion = require("../models/promotion.model");
 const cloudinary = require("../lib/cloudinary");
 const image = "not found";
 
@@ -126,6 +127,53 @@ exports.delete = async function (req, res) {
       code: 200,
       success: true,
       message: "Shop Deleted Successfully!",
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
+//getShopsByCategory
+exports.getShopsByCategory = async function (req, res) {
+  try {
+    const shops = await Shop.find({ category: req.params.category });
+    if (!shops)
+      return res
+        .status(200)
+        .json({
+          code: 200,
+          success: false,
+          message: "No shops found in this category",
+        });
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: shops,
+      message: "All Shops",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
+exports.getAllPromotionsByShop = async function (req, res) {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    const list = await Promise.all(
+      shop.promotion.map((promo) => {
+        return Promotion.findById(promo);
+      })
+    );
+
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: list,
+      message: "All Promotions",
     });
   } catch (err) {
     res
