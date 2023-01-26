@@ -28,6 +28,12 @@ const shopSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+  },
+  phone: {
+    type: String,
+  },
   image: {
     type: String,
     required: false,
