@@ -2,17 +2,11 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const utils = require("../lib/utils");
 const cloudinary = require("../lib/cloudinary");
-const image = "not found";
+const image = "https://res.cloudinary.com/hit-project-foot/image/upload/v1677339280/promo_App_Pictures/tzuhsimm5a8vnie5kss6.jpg";
 
 exports.register = async function (req, res) {
   try {
-    let result;
-    if (req.file) {
-      result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "promo_App_Pictures",
-      });
-    }
-
+    
     const emailExit = await User.findOne({ email: req.body.email });
     if (emailExit) {
       return res.status(400).send("Email already exists");
@@ -26,7 +20,7 @@ exports.register = async function (req, res) {
       email: req.body.email,
       password: hashed,
       phone: req.body.phone,
-      image: result?.secure_url || image,
+      image: image,
     });
 
     const savedUser = await newUser.save();
