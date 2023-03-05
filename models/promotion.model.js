@@ -22,6 +22,10 @@ const promoSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  shop: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "shop",
+  },
 });
 
 const Promotion = mongoose.model("promotion", promoSchema);

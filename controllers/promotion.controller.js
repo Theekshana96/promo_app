@@ -21,6 +21,7 @@ exports.add = async function (req, res) {
       description: req.body.description,
       types: req.body.types,
       image: result?.secure_url || image,
+      shop: shopId,
     });
 
     const savedPromo = await newPromo.save();
@@ -49,13 +50,31 @@ exports.add = async function (req, res) {
 
 exports.getAll = async function (req, res) {
   try {
-    const promotions = await Promotion.find();
-    res.status(200).json({
-      code: 200,
-      success: true,
-      data: promotions,
-      message: "All Promotions",
-    });
+    Promotion.find()
+      .populate("shop")                   
+      .exec(function (err, promotions) {
+        if (err) {
+          return res
+            .status(200)
+            .json({ code: 200, success: false, message: "Invalid promo id!" });
+        }
+        if (promotions) {
+          res.status(200).json({
+            code: 200,
+            success: true,
+            data: promotions,
+            message: "Promotions are received",
+          });
+        } else {
+          res.status(200).json({
+            code: 200,
+            success: false,
+            data: promotions,
+            message: "Promotions are not found",
+          });
+        }
+      });
+
   } catch (error) {
     res
       .status(500)
@@ -65,28 +84,30 @@ exports.getAll = async function (req, res) {
 
 exports.getOne = async function (req, res) {
   try {
-    Promotion.findById(req.params.id, function (err, promo) {
-      if (err) {
-        return res
-          .status(200)
-          .json({ code: 200, success: false, message: "Invalid promo id!" });
-      }
-      if (promo) {
-        res.status(200).json({
-          code: 200,
-          success: true,
-          data: promo,
-          message: "Promo is received",
-        });
-      } else {
-        res.status(200).json({
-          code: 200,
-          success: false,
-          data: promo,
-          message: "Promo is not found",
-        });
-      }
-    });
+    Promotion.findById(req.params.id)
+      .populate("shop")
+      .exec(function (err, promotion) {
+        if (err) {
+          return res
+            .status(200)
+            .json({ code: 200, success: false, message: "Invalid promo id!" });
+        }
+        if (promotion) {
+          res.status(200).json({
+            code: 200,
+            success: true,
+            data: promotion,
+            message: "Promotion is received",
+          });
+        } else {
+          res.status(200).json({
+            code: 200,
+            success: false,
+            data: promotion,
+            message: "Promotion is not found",
+          });
+        }
+      });
   } catch (error) {
     res
       .status(500)
