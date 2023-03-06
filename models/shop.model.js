@@ -21,11 +21,11 @@ const shopSchema = new mongoose.Schema({
     required: true,
   },
   lat: {
-    type: Integer,
+    type: Number,
     required: true,
   },
   lng: {
-    type: Integer,
+    type: Number,
     required: true,
   },
   email: {
