@@ -6,6 +6,6 @@ routes.post("/add/:id",storage.single("image"), PromoController.add);
 routes.get("/getAll", PromoController.getAll);
 routes.get("/getOne/:id", PromoController.getOne);
 routes.put("/update/:id",storage.single("image"), PromoController.update);
-routes.delete("/delete/:shopId/:id", PromoController.delete);
+routes.delete("/delete/:id", PromoController.delete);
 
 module.exports = routes;

@@ -2,6 +2,7 @@ const Promotion = require("../models/promotion.model");
 const Shop = require("../models/shop.model");
 const cloudinary = require("../lib/cloudinary");
 const image = "not found";
+const mongoose = require("mongoose");
 
 exports.add = async function (req, res) {
   try {
@@ -50,31 +51,49 @@ exports.add = async function (req, res) {
 
 exports.getAll = async function (req, res) {
   try {
-    Promotion.find()
-      .populate("shop")                   
-      .exec(function (err, promotions) {
-        if (err) {
-          return res
-            .status(200)
-            .json({ code: 200, success: false, message: "Invalid promo id!" });
-        }
-        if (promotions) {
-          res.status(200).json({
-            code: 200,
-            success: true,
-            data: promotions,
-            message: "Promotions are received",
-          });
-        } else {
-          res.status(200).json({
-            code: 200,
-            success: false,
-            data: promotions,
-            message: "Promotions are not found",
-          });
-        }
-      });
-
+    Promotion.aggregate([
+      {
+        $lookup: {
+          from: "shops",
+          localField: "shop",
+          foreignField: "_id",
+          as: "shop",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          offer: 1,
+          availability: 1,
+          price: 1,
+          description: 1,
+          types: 1,
+          image: 1,
+          shop: "$shop.name",
+        },
+      },
+    ]).exec(function (err, promotions) {
+      if (err) {
+        return res
+          .status(200)
+          .json({ code: 200, success: false, message: "Invalid promo id!" });
+      }
+      if (promotions) {
+        res.status(200).json({
+          code: 200,
+          success: true,
+          data: promotions,
+          message: "Promotions are received",
+        });
+      } else {
+        res.status(200).json({
+          code: 200,
+          success: false,
+          data: promotions,
+          message: "Promotions are not found",
+        });
+      }
+    });
   } catch (error) {
     res
       .status(500)
@@ -84,30 +103,54 @@ exports.getAll = async function (req, res) {
 
 exports.getOne = async function (req, res) {
   try {
-    Promotion.findById(req.params.id)
-      .populate("shop")
-      .exec(function (err, promotion) {
-        if (err) {
-          return res
-            .status(200)
-            .json({ code: 200, success: false, message: "Invalid promo id!" });
-        }
-        if (promotion) {
-          res.status(200).json({
-            code: 200,
-            success: true,
-            data: promotion,
-            message: "Promotion is received",
-          });
-        } else {
-          res.status(200).json({
-            code: 200,
-            success: false,
-            data: promotion,
-            message: "Promotion is not found",
-          });
-        }
-      });
+    Promotion.aggregate([
+      {
+        $lookup: {
+          from: "shops",
+          localField: "shop",
+          foreignField: "_id",
+          as: "shop",
+        },
+      },
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(req.params.id),
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          offer: 1,
+          availability: 1,
+          price: 1,
+          description: 1,
+          types: 1,
+          image: 1,
+          shop: "$shop.name",
+        },
+      },
+    ]).exec(function (err, promotion) {
+      if (err) {
+        return res
+          .status(200)
+          .json({ code: 200, success: false, message: "Invalid promo id!" });
+      }
+      if (promotion) {
+        res.status(200).json({
+          code: 200,
+          success: true,
+          data: promotion,
+          message: "Promotion is received",
+        });
+      } else {
+        res.status(200).json({
+          code: 200,
+          success: false,
+          data: promotion,
+          message: "Promotion is not found",
+        });
+      }
+    });
   } catch (error) {
     res
       .status(500)
@@ -131,6 +174,7 @@ exports.update = async function (req, res) {
       description: req.body.description || promo.description,
       types: req.body.types || promo.types,
       image: result?.secure_url || image || promo.image,
+      shop: req.body.shop || promo.shop,
     };
 
     promo = await Promotion.findByIdAndUpdate(req.params.id, data, {
@@ -151,8 +195,9 @@ exports.update = async function (req, res) {
 
 exports.delete = async function (req, res) {
   try {
-    const shopId = req.params.shopId;
     const promo = await Promotion.findById(req.params.id);
+    const shopId = promo.shop;
+    console.log("shopId", shopId);
     if (!promo) {
       return res
         .status(200)
@@ -173,7 +218,7 @@ exports.delete = async function (req, res) {
     res.status(200).json({
       code: 200,
       success: true,
-      message: "Promotion "+ req.params.id +" is deleted Successfully!",
+      message: "Promotion " + req.params.id + " is deleted Successfully!",
     });
   } catch (err) {
     res

@@ -7,5 +7,6 @@ routes.post("/login", UserController.login);
 routes.get("/getUsers", UserController.getUsers);
 routes.get("/getUser/:id", UserController.getUser);
 routes.put("/updateUser/:id",storage.single("image"), UserController.updateUser);
+routes.delete("/deleteUser/:id", UserController.deleteUser);
 
 module.exports = routes;

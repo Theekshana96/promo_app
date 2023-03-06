@@ -147,3 +147,26 @@ exports.updateUser = async function (req, res) {
       .json({ code: 500, success: false, message: "Internal Server Error" });
   }
 };
+
+//deleteUser
+exports.deleteUser = async function (req, res) {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res
+        .status(200)
+        .json({ code: 200, success: false, message: "User not found" });
+    }
+    await User.findByIdAndRemove(req.params.id);
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: user,
+      message: "User Deleted Successfully!",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
