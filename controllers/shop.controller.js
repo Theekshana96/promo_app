@@ -91,7 +91,9 @@ exports.update = async function (req, res) {
     let result;
 
     if (req.file) {
-      result = await cloudinary.uploader.upload(req.file.path);
+      result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "promo_App_Pictures",
+      });
     }
 
     const data = {
@@ -140,13 +142,11 @@ exports.getShopsByCategory = async function (req, res) {
   try {
     const shops = await Shop.find({ category: req.params.category });
     if (!shops)
-      return res
-        .status(200)
-        .json({
-          code: 200,
-          success: false,
-          message: "No shops found in this category",
-        });
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: "No shops found in this category",
+      });
     res.status(200).json({
       code: 200,
       success: true,

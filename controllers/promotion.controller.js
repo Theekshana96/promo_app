@@ -164,7 +164,9 @@ exports.update = async function (req, res) {
     let result;
 
     if (req.file) {
-      result = await cloudinary.uploader.upload(req.file.path);
+      result = await cloudinary.uploader.upload(req.file.path,{
+        folder: "promo_App_Pictures",
+      });
     }
 
     const data = {
