@@ -175,7 +175,7 @@ exports.update = async function (req, res) {
       price: req.body.price || promo.price,
       description: req.body.description || promo.description,
       types: req.body.types || promo.types,
-      image: result?.secure_url || image || promo.image,
+      image: result?.secure_url || promo.image,
       shop: req.body.shop || promo.shop,
     };
 
